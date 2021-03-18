@@ -8,6 +8,7 @@
 
 import random
 import konaneutils as U
+import time
 
 #------------------------------------------------------------------------
 #  Constructor:  K = Konane(board, who)
@@ -65,7 +66,12 @@ class Konane:
         random.shuffle(mymoves)
         mymove = mymoves[-1].moved
         # COMMENT OUT THE ABOVE AND REPLACE IT WITH YOUR OWN 
-
+        
+        
+        #mymove = Minimax(self.board, 3, -10000, 10000, true)
+        for moves in mymoves:
+            U.print_board(moves.b)
+        
         # ALTERNATE STARTER CODE: A single max layer.
         #bestmaxnode = self.maxlayer(self.board, self.who)
         #mymove = bestmaxnode.moved
@@ -106,3 +112,18 @@ class Konane:
     # A simple wrapper check gameDone on the current master board
     def gameDone(self, whomoves):
         return U.gameDone(self.board, whomoves)
+
+    # Minimax function that takes the possible moves, the depth of the tree
+    # the alpha and beta cutoffs and a 1 for this AI's turn and 0 for other
+    #def Minimax(board, depth, alpha, beta, turn):       
+    #    if depth == 0 or gameDone(self, self.other):
+    #      return score(self, self.board, depth)
+
+    #    if turn:
+    #        moves = U.genmoves(board, self.who)
+    #        for move in moves:
+            
+
+
+    def score(self, board, depth):
+        return len(U.genmoves(board, self.who)) - len(U.genmoves(board, self.other)) + depth

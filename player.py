@@ -62,13 +62,13 @@ class Konane:
         # STARTER CODE so that the player does something.
         # This will pick one random move
         # YOUR CODE REPLACES THIS
-        random.shuffle(mymoves)
-        mymove = mymoves[-1].moved
+        #random.shuffle(mymoves)
+        #mymove = mymoves[-1].moved
         # COMMENT OUT THE ABOVE AND REPLACE IT WITH YOUR OWN 
 
         # ALTERNATE STARTER CODE: A single max layer.
-        #bestmaxnode = self.maxlayer(self.board, self.who)
-        #mymove = bestmaxnode.moved
+        bestmaxnode = self.maxlayer(self.board, self.who)
+        mymove = bestmaxnode.moved
         # COMMENT OUT THE ABOVE AND REPLACE IT WITH YOUR OWN 
         
         # Assume that the move you selected (a 4-tuple) is in variable mymove.   
