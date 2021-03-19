@@ -33,7 +33,8 @@ class Konane:
         self.who = who
         self.other = {'x':'o', 'o':'x'}[who]
         self.human = False  # Self-explanatory
-        self.maxdepth = 1   # How deep can your tree search go
+        self.maxdepth = 3   # How deep can your tree search go
+        self.bestmove = None
   
     #---------------end of constructor------------------
 
@@ -67,8 +68,8 @@ class Konane:
         #mymove = mymoves[-1].moved
         # COMMENT OUT THE ABOVE AND REPLACE IT WITH YOUR OWN 
         
-        bestmove = self.miniMax(self.board, 3, -10000, 10000, True)
-        mymove = bestmove.moved
+        self.miniMax(self.board, self.maxdepth, -10000, 10000, True)
+        mymove = self.bestmove.moved
         
         # ALTERNATE STARTER CODE: A single max layer.
         #bestmaxnode = self.maxlayer(self.board, self.who)
@@ -113,17 +114,25 @@ class Konane:
 
     # Minimax function that takes the possible moves, the depth of the tree
     # the alpha and beta cutoffs and a 1 for this AI's turn and 0 for other
+
+    # Its playing the node it choses instead of going up the tree and playing 
+    # the path that leads to that outcome
     def miniMax(self, board, depth, alpha, beta, turn):       
         moves = U.genmoves(board, self.who)
         
         if depth == 0 or U.gameDone(board, self.other):
-          return self.score(self.board, depth)
+            U.print_board(board)
+            print(self.score(board, depth))
+            print("")
+            return self.score(board, depth)
 
         if turn:
             maxEval = -10000
             for move in moves:
                 eval = self.miniMax(move.b, depth - 1, alpha, beta, False)
-                maxEval = max(maxEval, eval)
+                if eval >= maxEval:
+                    maxEval = eval
+                    self.bestmove = move
                 alpha = max(alpha, eval)
                 if beta <= alpha:
                     break
@@ -134,11 +143,13 @@ class Konane:
             for move in moves:
                 eval = self.miniMax(move.b, depth - 1, alpha, beta, True)
                 minEval = min(minEval, eval)
+                if eval <= minEval:
+                    minEval = eval
+                    self.bestmove = move
                 beta = min(beta, eval)
                 if beta <= alpha:
                     break
             return minEval
-            
 
 
     def score(self, board, depth):
