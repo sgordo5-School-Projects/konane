@@ -6,6 +6,7 @@
 #
 # Notice the konaneutils module contains useful functions you can use.
 
+from sys import maxsize
 import random
 import konaneutils as U
 import time
@@ -24,8 +25,6 @@ import time
 #  Notice that "self.vbl" is the Python way of creating and accessing
 #  a class variable.
 #
-import random
-import konaneutils as U
 
 class Konane:
     def __init__(self, board, who):
@@ -33,7 +32,7 @@ class Konane:
         self.who = who
         self.other = {'x':'o', 'o':'x'}[who]
         self.human = False  # Self-explanatory
-        self.maxdepth = 3   # How deep can your tree search go
+        self.maxdepth = 5   # How deep can your tree search go
         self.bestmove = None
   
     #---------------end of constructor------------------
@@ -67,10 +66,14 @@ class Konane:
         #random.shuffle(mymoves)
         #mymove = mymoves[-1].moved
         # COMMENT OUT THE ABOVE AND REPLACE IT WITH YOUR OWN 
+        start = time.time()
+
+        self.miniMax(self.board, self.maxdepth, -maxsize, maxsize, True)
+        mymove = self.bestmove
         
-        self.miniMax(self.board, self.maxdepth, -10000, 10000, True)
-        mymove = self.bestmove.moved
-        
+        stop = time.time()
+
+        print("Elapsed time was: " + str(stop - start) + "\n")
         # ALTERNATE STARTER CODE: A single max layer.
         #bestmaxnode = self.maxlayer(self.board, self.who)
         #mymove = bestmaxnode.moved
@@ -114,43 +117,84 @@ class Konane:
 
     # Minimax function that takes the possible moves, the depth of the tree
     # the alpha and beta cutoffs and a 1 for this AI's turn and 0 for other
-
-    # Its playing the node it choses instead of going up the tree and playing 
-    # the path that leads to that outcome
     def miniMax(self, board, depth, alpha, beta, turn):       
-        moves = U.genmoves(board, self.who)
+        # Debugging print statements
+            #U.print_board(board)
+            #print("Score: " + str(self.score(board, depth)))
+            #print("Depth: " + str(depth))
+            #print(self.bestmove)
+            #print("\n")
         
-        if depth == 0 or U.gameDone(board, self.other):
-            U.print_board(board)
-            print(self.score(board, depth))
-            print("")
+        # If very top of the node return the score of the board after the move
+        if depth == 0:
             return self.score(board, depth)
 
+        # If it is this player's turn
         if turn:
-            maxEval = -10000
+            # Generate moves from the current board for this player
+            moves = U.genmoves(board, self.who)
+            # Set worst max to negative infinity
+            maxEval = -maxsize
+            # For every move generated from that board
             for move in moves:
+                # Evaluate all of its children up to the given depth
                 eval = self.miniMax(move.b, depth - 1, alpha, beta, False)
+                # If the score is better than the max score
                 if eval >= maxEval:
+                    # Set new max to this score
                     maxEval = eval
-                    self.bestmove = move
+                    # A caveat here. I was having trouble finding a way to return the move
+                    # that had the best score up the tree. Instead this should transfer the 
+                    # shared score up the tree and if it is the depth 2 node that shares the
+                    # best score that should also be the move that leads to that best outcome
+                    # as the scores propogate up the tree and the if statement has >= the = 
+                    # will let this move be chosen.
+                    # If the depth is right and it is equal to the max it is the best move.
+                    if depth >= 2:
+                        self.bestmove = move.moved
+                # take the max of alpha and eval for the cutoffs
                 alpha = max(alpha, eval)
+                #if the beta is greater than the alpha stop searching the tree
                 if beta <= alpha:
                     break
+            #return the max score found
             return maxEval
         
+        # If it is not this player's turn
         else:
-            minEval = 10000
+            # generate the moves of the other player with the given board
+            moves = U.genmoves(board, self.other)
+            # set the worst min to max integer
+            minEval = maxsize
+            # for all the generated moves
             for move in moves:
+                # evaluate all the move's children
                 eval = self.miniMax(move.b, depth - 1, alpha, beta, True)
+                # second caveat. we don't need this move but as far as searching the tree
+                # goes this is still important. This AI should never play this move but
+                # it needs to know as it is what the opponent would pick.
+                # set the new min to eval if lower
                 minEval = min(minEval, eval)
-                if eval <= minEval:
-                    minEval = eval
-                    self.bestmove = move
+                # if eval is lower than beta take eval as beta
                 beta = min(beta, eval)
+                # if beta is less than alpha trim the tree 
                 if beta <= alpha:
                     break
+            #return the lowest score found
             return minEval
 
-
+    # not exactly complicated scoring
     def score(self, board, depth):
-        return len(U.genmoves(board, self.who)) - len(U.genmoves(board, self.other)) + depth
+        #if the board loses for this player
+        if U.gameDone(board, self.who):
+            # negative infinity score
+            return -maxsize
+        #if the board wins for this player 
+        elif U.gameDone(board, self.other):
+            # positive infinity score
+            return maxsize
+        # else
+        else:
+            # take the amount of moves you have - the other player has + the current depth
+            # to encourage moves higher up in the tree and to encourage a win faster
+            return len(U.genmoves(board, self.who)) - len(U.genmoves(board, self.other)) + depth
