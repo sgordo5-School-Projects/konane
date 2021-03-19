@@ -53,24 +53,22 @@ class Konane:
     #
     def move(self):
         # For debugging
-        print("Score when move is called:" , self.simple_score(self.board))
+        print("Score when move is called:" , self.score(self.board, 3))
 
         # All possible moves I can make. U is the konaneutils module.
         # mymoves is a list of Node objects, each has a future board position 
         #    and the move which generated it. 
-        mymoves = U.genmoves(self.board, self.who)
+        #mymoves = U.genmoves(self.board, self.who)
 
         # STARTER CODE so that the player does something.
         # This will pick one random move
         # YOUR CODE REPLACES THIS
-        random.shuffle(mymoves)
-        mymove = mymoves[-1].moved
+        #random.shuffle(mymoves)
+        #mymove = mymoves[-1].moved
         # COMMENT OUT THE ABOVE AND REPLACE IT WITH YOUR OWN 
         
-        
-        #mymove = Minimax(self.board, 3, -10000, 10000, true)
-        for moves in mymoves:
-            U.print_board(moves.b)
+        bestmove = self.miniMax(self.board, 3, -10000, 10000, True)
+        mymove = bestmove.moved
         
         # ALTERNATE STARTER CODE: A single max layer.
         #bestmaxnode = self.maxlayer(self.board, self.who)
@@ -83,19 +81,19 @@ class Konane:
     # Simple function for maximizing layer, no cutoffs
     # Returns best successor Node object (a board position and the move which generated it)
     #
-    def maxlayer(self, brd, plyr):
+    #def maxlayer(self, brd, plyr):
         # Generate a list of Node objects, representing possible child nodes
-        possmoves = U.genmoves(brd, plyr)
+        #possmoves = U.genmoves(brd, plyr)
         
         # For each possible move, score it.  Remember best
-        bestmaxnode = None
-        bestmaxscore = -10000
-        for possmove in possmoves:
-           poss_score = self.simple_score(possmove.b)
-           if poss_score > bestmaxscore:
-               bestmaxscore = poss_score
-               bestmaxnode = possmove
-        return bestmaxnode
+        #bestmaxnode = None
+        #bestmaxscore = -10000
+        #for possmove in possmoves:
+           #poss_score = self.simple_score(possmove.b)
+           #if poss_score > bestmaxscore:
+               #bestmaxscore = poss_score
+               #bestmaxnode = possmove
+        #return bestmaxnode
 
 
     # Simple scoring function
@@ -106,8 +104,8 @@ class Konane:
     #
     # YOU MIGHT WANT TO WRITE YOUR OWN MORE SOPHISTICATED SCORING FUNCTION
     #
-    def simple_score(self, board):
-        return len(U.genmoves(board, self.who)) - len(U.genmoves(board, self.other))
+    #def simple_score(self, board):
+        #return len(U.genmoves(board, self.who)) - len(U.genmoves(board, self.other))
 
     # A simple wrapper check gameDone on the current master board
     def gameDone(self, whomoves):
@@ -115,13 +113,31 @@ class Konane:
 
     # Minimax function that takes the possible moves, the depth of the tree
     # the alpha and beta cutoffs and a 1 for this AI's turn and 0 for other
-    #def Minimax(board, depth, alpha, beta, turn):       
-    #    if depth == 0 or gameDone(self, self.other):
-    #      return score(self, self.board, depth)
+    def miniMax(self, board, depth, alpha, beta, turn):       
+        moves = U.genmoves(board, self.who)
+        
+        if depth == 0 or U.gameDone(board, self.other):
+          return self.score(self.board, depth)
 
-    #    if turn:
-    #        moves = U.genmoves(board, self.who)
-    #        for move in moves:
+        if turn:
+            maxEval = -10000
+            for move in moves:
+                eval = self.miniMax(move.b, depth - 1, alpha, beta, False)
+                maxEval = max(maxEval, eval)
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+            return maxEval
+        
+        else:
+            minEval = 10000
+            for move in moves:
+                eval = self.miniMax(move.b, depth - 1, alpha, beta, True)
+                minEval = min(minEval, eval)
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return minEval
             
 
 
