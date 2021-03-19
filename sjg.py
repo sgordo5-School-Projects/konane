@@ -32,7 +32,10 @@ class Konane:
         self.who = who
         self.other = {'x':'o', 'o':'x'}[who]
         self.human = False  # Self-explanatory
+
+        # please also change line 154 if changing maxdepth
         self.maxdepth = 5   # How deep can your tree search go
+        
         self.bestmove = None
   
     #---------------end of constructor------------------
@@ -150,7 +153,7 @@ class Konane:
                     # as the scores propogate up the tree and the if statement has >= the = 
                     # will let this move be chosen.
                     # If the depth is right and it is equal to the max it is the best move.
-                    if depth >= 2:
+                    if depth >= 4:
                         self.bestmove = move.moved
                 # take the max of alpha and eval for the cutoffs
                 alpha = max(alpha, eval)
